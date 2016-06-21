@@ -1,0 +1,73 @@
+package falstad;
+
+import static org.junit.Assert.*;
+import generation.CardinalDirection;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.Robot.Direction;
+
+/**
+ * This class will have the responsibility of testing the BasicRobot class to make sure that its specific methods 
+ * work properly.
+ * 
+ * @author corythomas
+ *
+ */
+
+public class BasicRobotTest {
+
+	private BasicRobot robot;
+	private MazeController maze;
+	private CardinalDirection cd;
+	
+	/**
+	 * This method will set up all the objects that will be needed and used in the test cases
+	 */
+	@Before
+	public void setUp() {
+		robot = new BasicRobot();
+		maze = new MazeController();
+	}
+
+	/**
+	 * This will test the constructor for the BasicRobot class to make sure 
+	 * it is creating a robot object and that it is setting everything to null.
+	 */
+	@Test
+	public void testBasicRobot() {
+		assertNotNull(robot);
+		
+		assertNull(robot.cells);
+		assertNull(robot.maze);
+		assertFalse(robot.hasStopped);
+		assertEquals(0, robot.currentPosition[0]);
+		assertEquals(0, robot.currentPosition[1]);
+	}
+	
+	/**
+	 * This will make sure that the get methods work for the BasicRobot class.
+	 */
+	@Test
+	public void testGetMethods() {
+		int[] posArr = robot.currentPosition;
+		assertEquals(posArr, robot.getCurrentPosition());
+		
+//		cd = robot.direction;
+//		assertEquals(cd, robot.getCurrentDirection());
+		
+		float battery = robot.batteryLevel;
+		assertEquals(battery, robot.getBatteryLevel(), battery);
+		assertEquals(12, robot.getEnergyForFullRotation(), 12);
+		assertEquals(5, robot.getEnergyForStepForward(), 5);
+		
+		assertTrue(robot.hasDistanceSensor(Direction.FORWARD));
+		assertTrue(robot.hasRoomSensor());
+		
+		float batteryLev = 250;
+		robot.setBatteryLevel(batteryLev);
+		assertEquals(batteryLev, robot.getBatteryLevel(), batteryLev);
+	}
+
+}

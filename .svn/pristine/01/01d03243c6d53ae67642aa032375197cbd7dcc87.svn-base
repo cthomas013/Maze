@@ -1,0 +1,119 @@
+package generation;
+
+import java.util.ArrayList;
+import generation.Wall;
+
+public class MazeBuilderKruskal extends MazeBuilder implements Runnable {
+	
+	public MazeBuilderKruskal() {
+		super();
+		System.out.println("MazeBuilderKruskal uses Kruskal's algorithm to generate maze.");
+	}
+	
+	public MazeBuilderKruskal(boolean det) {
+		super(det);
+		System.out.println("MazeBuilderKruskal uses Kruskal's algorithm to generate maze.");
+	}
+	
+	/**
+	 * This method generates pathways into the maze by using Kruskal's algorithm to generate a spanning tree for an undirected graph.
+	 * The cells are the nodes of the graph and the spanning tree. An edge represents that one can move from one cell to an adjacent cell.
+	 * So an edge implies that its nodes are adjacent cells in the maze and that there is no wall separating these cells in the maze. 
+	 */
+	@Override
+	public void generatePathways() {
+		
+		final ArrayList<Wall> wallCandidates = new ArrayList<Wall>();
+		CardinalDirection[] direction = new CardinalDirection[2];
+		
+		direction[0] = CardinalDirection.East;
+		direction[1] = CardinalDirection.South;
+		
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				Wall wall = new Wall(i, j, CardinalDirection.East);
+				for (CardinalDirection cd : direction) {
+					wall.setWall(i, j, cd);
+					
+					if (cells.canGo(wall)) {
+						wallCandidates.add(new Wall(i, j, cd));
+					}
+				}
+			}
+		}
+
+		// create an array list to hold the values in the cells
+		int[][] values = new int[width][height];
+		int count = 1;
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				values[x][y] = count;
+				count++;
+			}
+		}
+		
+		Wall currentWall;
+
+		
+//		// iterate through the list of walls until it becomes empty randomly choosing a wall to see if you can remove it
+//		while (!wallCandidates.isEmpty()) {
+//			// get current wall from the exractWall method
+//			currentWall = this.extractWallFromCandidateSetRandomly(wallCandidates);
+//			
+////			x = random.nextIntWithinInterval(0, height-1);
+////			y = random.nextIntWithinInterval(0, width-1);
+////			direction = random.nextIntWithinInterval(0, 3);
+////			
+////			if (direction == 0) {
+////				cd = CardinalDirection.West;
+////			}
+////			else if (direction == 1) {
+////				cd = CardinalDirection.North;
+////			}
+////			else if (direction == 2) {
+////				cd = CardinalDirection.East;
+////			}
+////			else {
+////				cd = CardinalDirection.South;
+////			}
+////			
+////			currentWall = new Wall(x, y, cd);
+////			
+//			if (cells.canGoKruskal(currentWall)) {
+//				
+//				// check to see if the neighbors are in the same set
+//				if (values[currentWall.getNeighborX()][currentWall.getNeighborY()] != values[currentWall.getX()][currentWall.getY()]) {	
+//					cells.deleteWall(currentWall);
+//					values[currentWall.getNeighborX()][currentWall.getNeighborY()] = 0;
+//					values[currentWall.getX()][currentWall.getY()] = 0;
+//				}			
+//			}
+//			wallCandidates.remove(currentWall);
+//		}
+		// iterate through the list of walls until it becomes empty randomly choosing a wall to see if you can remove it
+		while (!wallCandidates.isEmpty()) {
+			// get current wall from the exractWall method
+			currentWall = extractWallFromCandidateSetRandomly(wallCandidates);
+			
+			if (cells.canGo(currentWall)) {
+				
+				// check to see if the neighbors are in the same set
+				if (values[currentWall.getNeighborX()][currentWall.getNeighborY()] != values[currentWall.getX()][currentWall.getY()]) {
+					cells.deleteWall(currentWall);
+					values[currentWall.getNeighborX()][currentWall.getNeighborY()] = values[currentWall.getX()][currentWall.getY()];
+				}
+			}
+			
+		}
+	}
+	
+	private Wall extractWallFromCandidateSetRandomly(final ArrayList<Wall> candidates) {
+		return candidates.remove(random.nextIntWithinInterval(0, candidates.size()-1)); 
+	}
+	
+	@Override
+	public int generateRooms() {
+		return 0;
+	}
+
+}

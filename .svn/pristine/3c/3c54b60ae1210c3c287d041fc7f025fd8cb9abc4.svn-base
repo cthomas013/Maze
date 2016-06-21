@@ -1,0 +1,129 @@
+package falstad;
+
+import falstad.Robot.Direction;
+import falstad.Robot.Turn;
+import generation.Distance;
+import generation.Order;
+import generation.CardinalDirection;
+
+public class WallFollower implements RobotDriver {
+	
+	protected int[][] board;
+	protected BasicRobot robot;
+	protected Distance distance;
+	protected int pathLength;
+	protected MazeController maze;
+	protected CardinalDirection cd;
+	
+	public WallFollower() {
+		this.board = null;
+		this.robot = null;
+		this.distance = null;
+		this.pathLength = 0;
+		this.maze = new MazeController();
+	}
+	
+	public WallFollower(Order.Builder builder) {
+		this.board = null;
+		this.robot = null;
+		this.distance = null;
+		this.pathLength = 0;
+		this.maze = new MazeController(builder);
+	}
+
+	@Override
+	public void setRobot(Robot r) {
+		this.robot = (BasicRobot) r;
+		this.robot.setMaze(this.maze);
+	}
+
+	@Override
+	public void setDimensions(int width, int height) {
+		this.board = new int[width][height];
+	}
+
+	@Override
+	public void setDistance(Distance distance) {
+		this.distance = distance;
+	}
+
+	@Override
+	public boolean drive2Exit() throws Exception {
+//		this.maze.showMaze = true;
+//		this.maze.showSolution = true;
+//		this.maze.mapMode = true;
+		
+		while (!this.robot.isAtGoal()) {
+			if (this.robot.batteryLevel != 0) {
+				// check to see if there is a wall to the left and you can move forward
+				// if both are true then move forward
+//				if ((this.robot.cells.hasWall(this.robot.currentPosition[0], this.robot.currentPosition[1], 
+//						this.robot.direction.rotateCounterClockwise()) == true) && (this.robot.cells.hasNoWall(
+//								this.robot.currentPosition[0], this.robot.currentPosition[1], this.robot.direction))) {
+				if (this.robot.distanceToObstacle(Direction.LEFT) == 0 && this.robot.distanceToObstacle(Direction.FORWARD) > 0) {
+					this.robot.move(1, false);
+					Thread.sleep(500);
+				}
+				else {
+					if (this.robot.distanceToObstacle(Direction.LEFT) > 0) {
+						this.robot.rotate(Turn.LEFT);
+						this.robot.move(1, false);
+						Thread.sleep(500);
+
+					}
+					else if (this.robot.distanceToObstacle(Direction.RIGHT) > 0) {
+						this.robot.rotate(Turn.RIGHT);
+						this.robot.move(1, false);
+						Thread.sleep(500);
+
+					}
+					else {
+						this.robot.rotate(Turn.AROUND);
+						this.robot.move(1, false);
+						Thread.sleep(500);
+
+					}
+				}
+				this.pathLength++;
+			}
+			else {
+				return false;
+			}
+		}
+//		if (this.robot.canSeeGoal(Direction.LEFT)) {
+////			this.robot.rotate(Turn.LEFT);
+////			this.robot.move(1, false);
+//			( (BasicRobot) robot).maze.state = Constants.StateGUI.STATE_FINISH;
+//			( (BasicRobot) robot).maze.notifyViewerRedraw();
+//		}
+//		else if (this.robot.canSeeGoal(Direction.RIGHT)) {
+////			this.robot.rotate(Turn.RIGHT);
+////			this.robot.move(1, false);
+//			( (BasicRobot) robot).maze.state = Constants.StateGUI.STATE_FINISH;
+//			( (BasicRobot) robot).maze.notifyViewerRedraw();
+//		}
+//		else if (this.robot.canSeeGoal(Direction.BACKWARD)) {
+////			this.robot.rotate(Turn.AROUND);
+////			this.robot.move(1, false);
+//			( (BasicRobot) robot).maze.state = Constants.StateGUI.STATE_FINISH;
+//			( (BasicRobot) robot).maze.notifyViewerRedraw();
+//		}
+//		else if (this.robot.canSeeGoal(Direction.FORWARD)) {
+//			( (BasicRobot) robot).maze.state = Constants.StateGUI.STATE_FINISH;
+//			( (BasicRobot) robot).maze.notifyViewerRedraw();
+//		}
+		
+		return true;
+	}
+
+	@Override
+	public float getEnergyConsumption() {
+		return 2500 - this.robot.batteryLevel;
+	}
+
+	@Override
+	public int getPathLength() {
+		return this.pathLength;
+	}
+
+}

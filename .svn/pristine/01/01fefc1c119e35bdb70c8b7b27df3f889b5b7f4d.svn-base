@@ -1,0 +1,105 @@
+package generation;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.StubOrder;
+import generation.Order.Builder;
+import generation.MazeConfiguration;
+
+public class MazeFactoryTest {
+	
+	private boolean deterministic = true;
+	private MazeFactory mf1;
+	private MazeFactory mf2;
+	private Order stub1;
+	private Order stub2;
+	private MazeConfiguration mazeConfiguration;
+	private Cells cells;
+	private Distance distance;
+	
+	
+
+	@Before
+	public void setUp() {
+		mf1 = new MazeFactory();
+		mf2 = new MazeFactory(deterministic);
+		stub1 = new StubOrder();
+		stub2 = new StubOrder(3, Order.Builder.Prim);
+	}
+
+	@Test
+	public void testMazeFactory() {
+		assertNotNull(mf1);
+	}
+
+	@Test
+	public void testMazeFactoryBoolean() {
+		assertNotNull(mf2);
+	}
+
+	@Test
+	public void testOrder() {
+		// make sure the order method returns true when a valid input is entered
+		assertTrue(mf1.order(stub1));
+		
+		mf1.waitTillDelivered();
+		mf1.order(stub1);
+		
+		mazeConfiguration = ((StubOrder) stub1).getMazeConfiguration();
+		cells = mazeConfiguration.getMazecells();
+		// test to see if there is only one exit position in the maze
+		// do this by looping through every cell in the maze
+		// if the cell is an exit add it to a count variable, which should be 1 when done
+		// also make sure the exit position is on a border
+		boolean isBorder = false;
+		int count = 0;
+		for (int i=0; i < cells.width; i++) {
+			for (int j=0; j < cells.height; j++) {
+				if (cells.isExitPosition(i, j)) {
+					if ((i - 1 < 0) || (i + 1 >= cells.width) || (j - 1 < 0) || (j + 1 >= cells.height)) {
+					isBorder = true;	
+					count++;
+					}
+				}
+			}
+		}
+		assertEquals(1, count);
+		assertTrue(isBorder);
+		
+		distance = mazeConfiguration.getMazedists();
+		
+		
+	}
+		
+	@Test
+	public void testStubOrder() {
+		// test the StubOrder constructor when no arguments are given
+		assertEquals(0, stub1.getSkillLevel());
+		assertEquals(Builder.DFS, stub1.getBuilder());
+		assertEquals(true, stub1.isPerfect());
+		
+		// test the StubOrder constructor when arguments are given
+		assertEquals(3, stub2.getSkillLevel());
+		assertEquals(Builder.Prim, stub2.getBuilder());
+		assertEquals(true, stub2.isPerfect());
+	}
+
+	@Test
+	public void testCancel() {
+		// make sure both the builder and the currentOrder are set to null
+		assertEquals(null, mf1.builder);
+		assertEquals(null, mf1.currentOrder);
+		
+	}
+
+	@Test
+	public void testWaitTillDelivered() {
+		// make sure both the builder and the currentOrder are set to null
+		assertEquals(null, mf1.builder);
+		assertEquals(null, mf1.currentOrder);
+	}
+
+}

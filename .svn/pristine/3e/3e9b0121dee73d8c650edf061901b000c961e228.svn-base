@@ -1,0 +1,67 @@
+package falstad;
+
+import static org.junit.Assert.*;
+import generation.Order;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * This class will perform the tests of the WallFollower class to make sure that it is working 
+ * properly.
+ * 
+ * @author corythomas
+ *
+ */
+
+public class WallFollowerTest {
+	
+	private WallFollower driver1;
+	private WallFollower driver2;
+	private MazeController maze;
+	private Robot robot;
+
+	@Before
+	public void setUp() throws Exception {
+		driver1 = new WallFollower();
+		driver2 = new WallFollower(Order.Builder.Kruskal);
+		maze = new MazeController();
+		robot = new BasicRobot();
+	}
+
+	/**
+	 * This method will test the constructor for the WallFollower class.
+	 */
+	@Test
+	public void testWallFollower() {
+		assertNotNull(driver1);
+		
+		assertNull(driver1.board);
+		assertNull(driver1.robot);
+		assertNull(driver1.distance);
+		
+		assertEquals(0, driver1.pathLength);
+		assertNotNull(driver1.maze);
+		
+		assertNotNull(driver2);
+		
+		assertNull(driver2.board);
+		assertNull(driver2.robot);
+		assertNull(driver2.distance);
+		
+		assertEquals(0, driver2.pathLength);
+		assertNotNull(driver2.maze);
+	}
+	
+	/**
+	 * This method will test the setRobot method to make sure it is creating a robot object
+	 */
+	@Test
+	public void testSetRobot() {
+		driver1.setRobot(robot);
+		assertNotNull(driver1.robot);
+	}
+	
+
+
+}

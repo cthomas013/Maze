@@ -1,0 +1,81 @@
+package generation;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.StubOrder;
+import generation.Order.Builder;
+import generation.MazeConfiguration;
+
+public class MazeFactoryTest {
+	
+	private boolean deterministic = true;
+	private MazeFactory mf1;
+	private MazeFactory mf2;
+	private StubOrder stub1;
+	private StubOrder stub2;
+	private MazeConfiguration mazeConfiguration;
+	
+	
+
+	@Before
+	public void setUp() {
+		mf1 = new MazeFactory();
+		mf2 = new MazeFactory(deterministic);
+		stub1 = new StubOrder();
+		stub2 = new StubOrder(3, Order.Builder.Prim);
+	}
+
+	@Test
+	public void testMazeFactory() {
+		assertNotNull(mf1);
+	}
+
+	@Test
+	public void testMazeFactoryBoolean() {
+		assertNotNull(mf2);
+	}
+
+	@Test
+	public void testOrder() {
+		// make sure the order method returns true when a valid input is entered
+		assertTrue(mf1.order(stub1));
+		
+		mf1.waitTillDelivered();
+		mf1.order(stub1);
+		
+		mazeConfiguration = stub1.getMazeConfiguration();
+		mf1.currentOrder.deliver(mazeConfiguration);
+		
+		
+	}
+		
+	@Test
+	public void testStubOrder() {
+		// test the StubOrder constructor when no arguments are given
+		assertEquals(0, stub1.getSkillLevel());
+		assertEquals(Builder.DFS, stub1.getBuilder());
+		assertEquals(true, stub1.isPerfect());
+		
+		// test the StubOrder constructor when arguments are given
+		assertEquals(3, stub2.getSkillLevel());
+		assertEquals(Builder.Prim, stub2.getBuilder());
+		assertEquals(true, stub2.isPerfect());
+	}
+
+	@Test
+	public void testCancel() {
+		// make sure both the builder and the currentOrder are set to null
+		assertEquals(null, mf1.builder);
+		assertEquals(null, mf1.currentOrder);
+		
+	}
+
+	@Test
+	public void testWaitTillDelivered() {
+		fail("Not yet implemented");
+	}
+
+}

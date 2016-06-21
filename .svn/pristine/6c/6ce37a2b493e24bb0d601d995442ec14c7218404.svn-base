@@ -1,0 +1,22 @@
+package generation;
+
+import static org.junit.Assert.*;
+
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class MazeBuilderKruskalTest {
+	
+	private MazeBuilder maze1;
+	private MazeBuilder maze2;
+	private MazeConfiguration mazeConfig;
+
+	@Before
+	public void setUp() {
+		maze1 = new MazeBuilderKruskal();
+		maze2 = new MazeBuilderKruskal(true);
+	}
+
+	
+}

@@ -1,0 +1,50 @@
+package generation;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.StubOrder;
+
+public class MazeFactoryTest {
+	
+	private boolean deterministic = true;
+	private Order ord;
+	private MazeFactory mf1;
+	private MazeFactory mf2;
+	
+	
+
+	@Before
+	public void setUp() {
+		mf1 = new MazeFactory();
+		mf2 = new MazeFactory(deterministic);
+	}
+
+	@Test
+	public void testMazeFactory() {
+		assertNotNull(mf1);
+	}
+
+	@Test
+	public void testMazeFactoryBoolean() {
+		assertNotNull(mf2);
+	}
+
+	@Test
+	public void testOrder() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testCancel() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testWaitTillDelivered() {
+		fail("Not yet implemented");
+	}
+
+}

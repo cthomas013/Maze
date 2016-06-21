@@ -1,0 +1,139 @@
+package falstad;
+
+import static org.junit.Assert.*;
+import generation.CardinalDirection;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.Robot.Direction;
+import falstad.Robot.Turn;
+import generation.Cells;
+import generation.MazeConfiguration;
+import generation.MazeFactory;
+import generation.Order;
+
+/**
+ * This class will have the responsibility of testing the BasicRobot class to make sure that its specific methods 
+ * work properly.
+ * 
+ * @author corythomas
+ *
+ */
+
+public class BasicRobotTest {
+
+	private BasicRobot robot;
+	private MazeController maze;
+	private CardinalDirection cd;
+	private Cells cells;
+	private MazeConfiguration mazeConfig;
+	private MazeFactory mf;
+	private Order stub;
+	
+	/**
+	 * This method will set up all the objects that will be needed and used in the test cases
+	 */
+	@Before
+	public void setUp() {
+		robot = new BasicRobot();
+		maze = new MazeController();
+		cd = CardinalDirection.East;
+	}
+
+	/**
+	 * This will test the constructor for the BasicRobot class to make sure 
+	 * it is creating a robot object and that it is setting everything to null.
+	 */
+	@Test
+	public void testBasicRobot() {
+		assertNotNull(robot);
+		
+		assertNull(robot.cells);
+		assertNull(robot.maze);
+		assertFalse(robot.hasStopped);
+		assertEquals(0, robot.currentPosition[0]);
+		assertEquals(0, robot.currentPosition[1]);
+	}
+	
+	/**
+	 * This will make sure that the get methods work for the BasicRobot class.
+	 */
+	@Test
+	public void testGetMethods() {
+		int[] posArr = robot.currentPosition;
+		assertEquals(posArr, robot.getCurrentPosition());
+		
+		this.robot.setMaze(this.maze);
+		cd = robot.direction;
+		assertEquals(cd, robot.getCurrentDirection());
+		
+		float battery = robot.batteryLevel;
+		assertEquals(battery, robot.getBatteryLevel(), battery);
+		assertEquals(12, robot.getEnergyForFullRotation(), 12);
+		assertEquals(5, robot.getEnergyForStepForward(), 5);
+		
+		assertTrue(robot.hasDistanceSensor(Direction.FORWARD));
+		assertTrue(robot.hasDistanceSensor(Direction.BACKWARD));
+		assertTrue(robot.hasDistanceSensor(Direction.LEFT));
+		assertTrue(robot.hasDistanceSensor(Direction.RIGHT));
+		assertTrue(robot.hasRoomSensor());
+		
+		float batteryLev = 250;
+		robot.setBatteryLevel(batteryLev);
+		assertEquals(batteryLev, robot.getBatteryLevel(), batteryLev);
+	}
+	
+	/** 
+	 * This method will test the rotate method to make sure that it is doing what it 
+	 * is supposed to do.
+	 */
+	@Test
+	public void testRotate() {
+		this.robot.setMaze(this.maze);
+		
+		this.cd = robot.direction;
+		this.robot.rotate(Turn.RIGHT);
+		assertEquals(cd.rotateClockwise(), this.robot.direction);
+		
+		this.cd = robot.direction;
+		this.robot.rotate(Turn.LEFT);
+		assertEquals(cd.rotateCounterClockwise(), this.robot.direction);
+		
+		this.cd = robot.direction;
+		this.robot.rotate(Turn.AROUND);
+		assertEquals(cd.oppositeDirection(), this.robot.direction);
+		
+		this.cd = robot.direction;
+		this.robot.setBatteryLevel(2);
+		this.robot.rotate(Turn.RIGHT);
+		assertTrue(this.robot.hasStopped());
+	}
+	
+	/**
+	 * This method will test to make sure the BasicRobot object can know
+	 * if it is inside a room
+	 */
+//	@Test
+//	public void testIsInRoom() {
+//		this.robot.setMaze(this.maze);
+////		assertFalse(this.robot.isAtGoal());
+//		
+//		cells = this.maze.mazeConfig.getMazecells();
+//		
+//		int exitX = 0;
+//		int exitY = 0;
+//		for (int i = 0; i < cells.width; i++) {
+//			for (int j = 0; j < cells.height; j++) {
+//				if (cells.isExitPosition(i, j)) {
+//					exitX = i;
+//					exitY = j;
+//				}
+//			}
+//		}
+//		this.robot.currentPosition[0] = exitX;
+//		this.robot.currentPosition[1] = exitY;
+//		assertTrue(this.robot.isAtGoal());
+//	}
+
+}

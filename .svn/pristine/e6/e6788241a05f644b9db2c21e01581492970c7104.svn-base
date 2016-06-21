@@ -1,0 +1,132 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import generation.Cells;
+import generation.Distance;
+import generation.MazeConfiguration;
+import generation.MazeFactory;
+import generation.Order;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * This class will perform the tests of the WallFollower class to make sure that it is working 
+ * properly.
+ * 
+ * @author corythomas
+ *
+ */
+
+public class WallFollowerTest {
+	
+	private WallFollower driver1;
+	private WallFollower driver2;
+	private MazeController maze;
+	private Robot robot;
+	private Distance distance;
+	private Cells cells;
+	private MazeConfiguration mazeConfig;
+	private Order stub;
+	private MazeFactory mf;
+
+	@Before
+	public void setUp() throws Exception {
+		driver1 = new WallFollower();
+		driver2 = new WallFollower(Order.Builder.Kruskal);
+		maze = new MazeController(driver1);
+		robot = new BasicRobot();
+		distance = new Distance(4, 4);
+		stub = new StubOrder();
+		mf = new MazeFactory();
+	}
+
+	/**
+	 * This method will test the constructor for the WallFollower class.
+	 */
+	@Test
+	public void testWallFollower() {
+		assertNotNull(driver1);
+		
+		assertNull(driver1.board);
+		assertNotNull(driver1.robot);
+		assertNull(driver1.distance);
+		
+		assertEquals(0, driver1.pathLength);
+		assertNotNull(driver1.maze);
+		
+		assertNotNull(driver2);
+		
+		assertNull(driver2.board);
+		assertNull(driver2.robot);
+		assertNull(driver2.distance);
+		
+		assertEquals(0, driver2.pathLength);
+		assertNotNull(driver2.maze);
+	}
+	
+	/**
+	 * This method will test the setRobot method to make sure it is creating a robot object
+	 */
+	@Test
+	public void testSetRobot() {
+		driver1.setRobot(robot);
+		assertNotNull(driver1.robot);
+	}
+	
+	/**
+	 * This method will test the setDimensions and setDirection methods to make sure the objects are 
+	 * not null after the set method is called on them
+	 */
+	@Test
+	public void testSetMethods() {
+		this.driver1.setDistance(this.distance);
+		assertNotNull(this.driver1.distance);
+		
+		this.driver1.setDimensions(4, 4);
+		assertNotNull(this.driver1.board);
+	}
+	
+	/**
+	 * This method will test the getPathLength and getEnergyConsumption methods.
+	 */
+	@Test
+	public void testGetMehtods() {
+		assertEquals(this.driver1.pathLength, this.driver1.getPathLength());
+		
+		this.driver1.setRobot(this.robot);
+		float energyConsumed = 2500 - this.driver1.robot.batteryLevel;
+		assertEquals(energyConsumed, this.driver1.getEnergyConsumption(), energyConsumed);
+	}
+	
+	/**
+	 * This method will test the drive2Exit method to make sure it takes you 
+	 * a cell that is the exit position
+	 */
+	@Test
+	public void testDrive2Exit() {
+
+		mf.order(stub);
+		mf.waitTillDelivered();
+		mazeConfig = ( (StubOrder) stub).getMazeConfiguration();
+		cells = mazeConfig.getMazecells();
+		
+		driver1.setDimensions(this.mazeConfig.getWidth(), this.mazeConfig.getHeight());
+		driver1.setDistance(this.mazeConfig.getMazedists());
+		driver1.setRobot(robot);
+		driver1.robot.setMaze(this.maze);
+		driver1.robot.setMazeCells(cells);
+		
+		try {
+			this.driver1.drive2Exit();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assertTrue(this.driver1.robot.isAtGoal());
+		
+	}
+
+
+}

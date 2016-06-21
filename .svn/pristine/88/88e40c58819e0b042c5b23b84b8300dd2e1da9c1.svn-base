@@ -1,0 +1,66 @@
+/*
+ * @author Cory
+ * 
+ */
+
+package falstad;
+
+import generation.MazeConfiguration;
+import generation.MazeContainer;
+import generation.MazeFactory;
+import generation.Order;
+import generation.Order.Builder;
+
+/**
+ * 
+ * This class has the task of creating an OrderStub that can be used in the MazeFactoryTest
+ * to test the order method in MazeFactory
+ *
+ */
+
+public class StubOrder extends MazeController implements Order {
+	
+	public StubOrder() {
+		super() ;
+		setBuilder(Order.Builder.DFS); 
+		setPerfect(true);
+		setSkillLevel(0);
+	}
+	
+	public StubOrder(int skillLevel, Builder builder) {
+		super() ;
+		setBuilder(builder) ;
+		setPerfect(true);
+		setSkillLevel(skillLevel);
+	}
+
+	@Override
+	public int getSkillLevel() {
+		return super.skill;
+	}
+
+	@Override
+	public Builder getBuilder() {
+		return super.builder;
+	}
+
+	@Override
+	public boolean isPerfect() {
+		return super.perfect;
+	}
+
+	@Override
+	public void deliver(MazeConfiguration mazeConfig) {
+		super.deliver(mazeConfig);
+	}
+
+	@Override
+	public void updateProgress(int percentage) {
+		super.updateProgress(percentage);	
+	}
+	
+	public MazeConfiguration getMazeConfiguration() {
+		return super.getMazeConfiguration();
+	}
+
+}

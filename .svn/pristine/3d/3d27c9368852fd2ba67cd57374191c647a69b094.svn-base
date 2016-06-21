@@ -1,0 +1,323 @@
+package falstad;
+
+import generation.CardinalDirection;
+import generation.Cells;
+
+/**
+ * Class: BasicRobot
+ * 
+ * Responsibilities: this class has the tasks of rotating within the maze to change the current Cardinal Direction;
+ * moving in the maze a specific number of steps, recognizing how far a wall is in a given direction from
+ * the robot's current position, and seeing if the robot is at the goal.
+ * 
+ * Collaborators: Robot, CardinalDirection, Cells, MazeController
+ * 
+ * @author corythomas
+ *
+ */
+
+public class BasicRobot implements Robot {
+	
+	protected int[] currentPosition;
+	protected CardinalDirection direction;
+	protected MazeController maze;
+	protected Cells cells;
+	protected float batteryLevel;
+	protected boolean hasStopped;
+	
+	public boolean forwardDistanceSensor;
+	public boolean backwardDistanceSensor;
+	public boolean leftDistanceSensor;
+	public boolean rightDistanceSensor;
+	
+	public BasicRobot() {
+		this.currentPosition = new int[2];
+		this.currentPosition[0] = 0;
+		this.currentPosition[1] = 0;
+		this.maze = null;
+		this.batteryLevel = 2500;
+		this.hasStopped = false;
+		direction = CardinalDirection.East;
+		this.forwardDistanceSensor = true;
+		this.backwardDistanceSensor = true;
+		this.leftDistanceSensor = true;
+		this.rightDistanceSensor = true;
+	}
+
+	@Override
+	public void rotate(Turn turn) {
+		switch(turn) {
+		case LEFT:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 3) {
+				this.direction = this.direction.rotateCounterClockwise();
+				this.batteryLevel -= 3;
+			}
+			else {
+				this.hasStopped = true;
+			}
+			break;
+		case RIGHT:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 3) {
+				this.direction = this.direction.rotateClockwise();
+				this.batteryLevel -= 3;
+			}
+			else {
+				this.hasStopped = true;
+			}
+			break;
+		case AROUND:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 6) {
+				this.direction = this.direction.oppositeDirection();
+				this.batteryLevel -= 6;
+			}
+			else {
+				this.hasStopped = true;
+			}
+			break;
+		}
+	}
+
+	@Override
+	public void move(int distance, boolean manual) {
+		
+		while (distance > 0) {
+//			int currX = this.maze.getCurrentPosition()[0];
+//			int currY = this.maze.getCurrentPosition()[1];
+			this.currentPosition = this.maze.getCurrentPosition();
+			
+			if (this.batteryLevel >= 5) {
+				if (manual == true) {
+					distance = 1;
+				}
+				if (this.distanceToObstacle(Direction.FORWARD) > 0) {
+					
+					// create a switch to see which direction you are facing so you can change
+					// your current position
+					switch(this.direction) {
+					case North:
+						this.currentPosition[1]--;
+						break;
+					case East:
+						this.currentPosition[0]++;
+						break;
+					case West:
+						this.currentPosition[0]--;
+						break;
+					case South:
+						this.currentPosition[1]++;
+						break;
+					}
+					this.maze.setCurrentPosition(this.currentPosition[0], this.currentPosition[1]);
+					this.batteryLevel -= 5;
+					distance--;
+				}
+				else {
+					this.hasStopped = true;
+				}
+			}
+			else {
+				this.hasStopped = true;
+			}
+		}
+	}
+	
+	/**
+	 * This method will be used by the wizard to move to a specific location on the board
+	 * @param x is the x-coordinate on the board
+	 * @param y is the y-coordinate on the board
+	 */
+	public void move2Position(int x, int y) {
+		if (this.batteryLevel >= 5) {
+			this.currentPosition[0] = x;
+			this.currentPosition[1] = y;
+			this.maze.setCurrentPosition(this.currentPosition[0], this.currentPosition[1]);
+			this.batteryLevel -= 5;
+		}
+		else {
+			this.hasStopped = true;
+		}
+	}
+
+	@Override
+	public int[] getCurrentPosition() {
+		return this.currentPosition;
+	}
+
+	@Override
+	public void setMaze(MazeController maze) {
+		this.maze = maze;
+		this.cells = new Cells(this.maze.mazeConfig.getWidth(), this.maze.mazeConfig.getHeight());
+		this.cells = this.maze.mazeConfig.getMazecells();
+		this.currentPosition = this.maze.getCurrentPosition();
+//		this.direction = this.maze.getCurrentDirection();
+		int[] cd = new int[2];
+		cd = this.direction.getDirection();
+		if (cd[0] == 0 && cd[1] == -1) {
+			this.direction = CardinalDirection.North;
+		}
+		else if (cd[0] == 1 && cd[1] == 0) {
+			this.direction = CardinalDirection.East;
+		}
+		else if (cd[0] == 0 && cd[1] == 1) {
+			this.direction = CardinalDirection.South;
+		}
+		else {
+			this.direction = CardinalDirection.West;
+		}
+	}
+
+	@Override
+	public boolean isAtGoal() {
+		return cells.isExitPosition(this.currentPosition[0], this.currentPosition[1]);
+	}
+
+	@Override
+	public boolean canSeeGoal(Direction direction) throws UnsupportedOperationException {
+
+		if (this.hasDistanceSensor(direction) == true) {
+			if (this.distanceToObstacle(direction) == Integer.MAX_VALUE) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		return cells.isInRoom(this.currentPosition[0], this.currentPosition[1]);
+	}
+
+	@Override
+	public boolean hasRoomSensor() {
+		return true;
+	}
+
+	@Override
+	public CardinalDirection getCurrentDirection() {
+		return this.direction;
+	}
+
+	@Override
+	public float getBatteryLevel() {
+		return this.batteryLevel;
+	}
+
+	@Override
+	public void setBatteryLevel(float level) {
+		this.batteryLevel = level;
+	}
+
+	@Override
+	public float getEnergyForFullRotation() {
+		return 12;
+	}
+
+	@Override
+	public float getEnergyForStepForward() {
+		return  5;
+	}
+
+	@Override
+	public boolean hasStopped() {
+		return this.hasStopped;
+	}
+
+	@Override
+	public int distanceToObstacle(Direction direction) throws UnsupportedOperationException {
+		if (this.hasDistanceSensor(direction)) {
+			// charge the battery for looking to see if it has a distance sensor
+			this.setBatteryLevel(this.batteryLevel - 1);
+			// get the cardinal direction for the purpose of finding if a cell has a wall
+			CardinalDirection cd;
+			if (direction == Direction.LEFT) {
+				cd = this.direction.rotateCounterClockwise();
+			}
+			else if (direction == Direction.RIGHT) {
+				cd = this.direction.rotateClockwise();
+			}
+			else if (direction == Direction.BACKWARD) {
+				cd = this.direction.oppositeDirection();
+			}
+			else {
+				cd = this.direction;
+			}
+			
+			// set a counter to see how many steps you can go before running into an obstacle
+			int count = 0;
+			int currX = this.maze.getCurrentPosition()[0];
+			int currY = this.maze.getCurrentPosition()[1];
+			// use a while loop to keep the count until you hut a wall
+//			while (cells.hasWall(currX, currY, cd) != true) {
+			while (true) {
+				if (currX < 0 || currX >= cells.width || currY < 0 || currY >= cells.height) {
+					return Integer.MAX_VALUE;
+				}
+
+				else {
+					switch (cd) {
+					case North:
+						if (this.cells.hasWall(currX, currY, CardinalDirection.North)) {
+							return count;
+						}
+						currY--;
+						break;
+					case South:
+						if (this.cells.hasWall(currX, currY, CardinalDirection.South)) {
+							return count;
+						}
+						currY++;
+						break;
+					case East:
+						if (this.cells.hasWall(currX, currY, CardinalDirection.East)) {
+							return count;
+						}
+						currX++;
+						break;
+					case West:
+						if (this.cells.hasWall(currX, currY, CardinalDirection.West)) {
+							return count;
+						}
+						currX--;
+						break;
+					}
+					count++;
+				}
+			}
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		if (direction == Direction.FORWARD) {
+			return this.forwardDistanceSensor;
+		}
+		else if (direction == Direction.BACKWARD) {
+			return this.backwardDistanceSensor;
+		}
+		else if (direction == Direction.LEFT) {
+			return this.leftDistanceSensor;
+		}
+		else {
+			return this.rightDistanceSensor;
+		}
+	}
+	/**
+	 * This method is used by the BasicRobotTest class to make sure the cells are not null.
+	 * @param cells is a non null cells object that is passed in so that the cells field can be set to this
+	 */
+	public void setMazeCells(Cells cells) {
+		this.cells = cells;
+	}
+	
+}

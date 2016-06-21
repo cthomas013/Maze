@@ -1,0 +1,44 @@
+package generation;
+
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class MazeFactoryTest {
+	
+	public boolean deterministic;
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@Test
+	public void testMazeFactory() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testMazeFactoryBoolean() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testOrder() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testCancel() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testWaitTillDelivered() {
+		fail("Not yet implemented");
+	}
+
+}

@@ -1,0 +1,214 @@
+package falstad;
+
+import generation.CardinalDirection;
+import generation.Cells;
+
+public class BasicRobot implements Robot {
+	
+	protected int[] currentPosition;
+	protected CardinalDirection direction;
+	protected MazeController maze;
+	protected Cells cells;
+	protected float batteryLevel;
+	protected boolean hasStopped;
+	
+	public BasicRobot() {
+		this.currentPosition[0] = 0;
+		this.currentPosition[1] = 0;
+		this.direction = direction.getDirection(0, 0);
+		this.maze = null;
+		this.batteryLevel = 2500;
+		this.hasStopped = false;
+	}
+
+	@Override
+	public void rotate(Turn turn) {
+		switch(turn) {
+		case LEFT:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 3) {
+				this.direction = this.direction.rotateCounterClockwise();
+				this.batteryLevel -= 3;
+			}
+			else {
+				this.hasStopped = true;
+			}
+		case RIGHT:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 3) {
+				this.direction = this.direction.rotateClockwise();
+				this.batteryLevel -= 3;
+			}
+			else {
+				this.hasStopped = true;
+			}
+		case AROUND:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 6) {
+				this.direction = this.direction.oppositeDirection();
+				this.batteryLevel -= 6;
+			}
+			else {
+				this.hasStopped = true;
+			}
+		}
+	}
+
+	@Override
+	public void move(int distance, boolean manual) {
+		// check to make sure you have enough battery to move 
+		if (this.batteryLevel >= 5) {
+			if (manual == true) {
+				distance = 1;
+			}
+			else {
+				
+			}
+		}
+	}
+
+	@Override
+	public int[] getCurrentPosition() throws Exception {
+		return this.currentPosition;
+	}
+
+	@Override
+	public void setMaze(MazeController maze) {
+		this.maze = maze;
+		this.cells = this.maze.mazeConfig.getMazecells();
+	}
+
+	@Override
+	public boolean isAtGoal() {
+		return cells.isExitPosition(this.currentPosition[0], this.currentPosition[1]);
+	}
+
+	@Override
+	public boolean canSeeGoal(Direction direction) throws UnsupportedOperationException {
+		// get the cardinal direction for the purpose of finding if a cell has a wall
+		CardinalDirection cd;
+		if (direction == Direction.LEFT) {
+			cd = this.direction.rotateCounterClockwise();
+		}
+		else if (direction == Direction.RIGHT) {
+			cd = this.direction.rotateClockwise();
+		}
+		else if (direction == Direction.BACKWARD) {
+			cd = this.direction.oppositeDirection();
+		}
+		else {
+			cd = this.direction;
+		}
+		
+		int currX = this.currentPosition[0];
+		int currY = this.currentPosition[1];
+		while ((cells.hasWall(currX, currY, cd) != true) && (cells.isExitPosition(currX, currY) != true)) {
+			switch(cd) {
+			case North:
+				currX++;
+			case South:
+				currX--;
+			case East:
+				currY++;
+			case West:
+				currY--;
+			}
+		}
+		if (cells.isExitPosition(currX, currY) == true) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		return cells.isInRoom(this.currentPosition[0], this.currentPosition[1]);
+	}
+
+	@Override
+	public boolean hasRoomSensor() {
+		return true;
+	}
+
+	@Override
+	public CardinalDirection getCurrentDirection() {
+		return this.direction;
+	}
+
+	@Override
+	public float getBatteryLevel() {
+		return this.batteryLevel;
+	}
+
+	@Override
+	public void setBatteryLevel(float level) {
+		this.batteryLevel = level;
+	}
+
+	@Override
+	public float getEnergyForFullRotation() {
+		return 12;
+	}
+
+	@Override
+	public float getEnergyForStepForward() {
+		return  5;
+	}
+
+	@Override
+	public boolean hasStopped() {
+		return this.hasStopped;
+	}
+
+	@Override
+	public int distanceToObstacle(Direction direction) throws UnsupportedOperationException {
+		// get the cardinal direction for the purpose of finding if a cell has a wall
+		CardinalDirection cd;
+		if (direction == Direction.LEFT) {
+			cd = this.direction.rotateCounterClockwise();
+		}
+		else if (direction == Direction.RIGHT) {
+			cd = this.direction.rotateClockwise();
+		}
+		else if (direction == Direction.BACKWARD) {
+			cd = this.direction.oppositeDirection();
+		}
+		else {
+			cd = this.direction;
+		}
+		// set a counter to see how many steps you can go before running into an obstacle
+		int count = 0;
+		int maxValue = cells.height + 1;
+		int currX = this.currentPosition[0];
+		int currY = this.currentPosition[1];
+		// use a while loop to keep the count until you hut a wall
+		while (cells.hasWall(currX, currY, cd) != true) {
+			if (canSeeGoal(direction) == true) {
+				return maxValue;
+			}
+			else {
+				switch(cd) {
+				case North:
+					currX++;
+				case South:
+					currX--;
+				case East:
+					currY++;
+				case West:
+					currY--;
+				
+				count++;
+				}
+			}
+		}
+		return count;
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		return true;
+	}
+
+}

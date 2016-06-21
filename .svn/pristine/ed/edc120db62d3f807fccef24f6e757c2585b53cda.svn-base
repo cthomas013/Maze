@@ -1,0 +1,80 @@
+package generation;
+
+import java.util.ArrayList;
+import generation.Wall;
+
+public class MazeBuilderKruskal extends MazeBuilder implements Runnable {
+	
+	public MazeBuilderKruskal() {
+		super();
+		System.out.println("MazeBuilderKruskal uses Kruskal's algorithm to generate maze.");
+	}
+	
+	public MazeBuilderKruskal(boolean det) {
+		super(det);
+		System.out.println("MazeBuilderKruskal uses Kruskal's algorithm to generate maze.");
+	}
+	
+	/**
+	 * This method generates pathways into the maze by using Kruskal's algorithm to generate a spanning tree for an undirected graph.
+	 * The cells are the nodes of the graph and the spanning tree. An edge represents that one can move from one cell to an adjacent cell.
+	 * So an edge implies that its nodes are adjacent cells in the maze and that there is no wall separating these cells in the maze. 
+	 */
+	@Override
+	public void generatePathways() {
+		
+		final ArrayList<Wall> wallCandidates = new ArrayList<Wall>();
+		
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				Wall wall = new Wall(i, j, CardinalDirection.East);
+				for (CardinalDirection cd : CardinalDirection.values()) {
+					wall.setWall(i, j, cd);
+					
+					if (cells.canGo(wall)) {
+						wallCandidates.add(new Wall(i, j, cd));
+					}
+				}
+			}
+			
+		}
+		
+		// create an array list to hold the values in the cells
+		int[][] values = new int[height][width];
+		int count = 1;
+		for (int x = 0; x < height; x++) {
+			for (int y = 0; y < width; y++) {
+				values[x][y] = count;
+				count++;
+			}
+		}
+
+		
+		// iterate through the list of walls until it becomes empty randomly choosing a wall to see if you can remove it
+		while (!wallCandidates.isEmpty()) {
+			// get current wall from the exractWall method
+			Wall currentWall = this.extractWallFromCandidateSetRandomly(wallCandidates);
+			
+			if (cells.canGoKruskal(currentWall)) {
+				
+				// check to see if the neighbors are in the same set
+				if (values[currentWall.getNeighborX()][currentWall.getNeighborY()] == values[currentWall.getX()][currentWall.getY()]) {
+					wallCandidates.remove(currentWall);
+				}
+				else {
+					// if they are not in the same set delete the current wall from the list of walls
+					// and set the two cells equal to each other
+					cells.deleteWall(currentWall);
+					
+					values[currentWall.getNeighborX()][currentWall.getNeighborY()] = values[currentWall.getX()][currentWall.getY()];
+				}
+			}
+			
+		}
+	}
+	
+	private Wall extractWallFromCandidateSetRandomly(final ArrayList<Wall> candidates) {
+		return candidates.remove(random.nextIntWithinInterval(0, candidates.size()-1)); 
+	}
+
+}

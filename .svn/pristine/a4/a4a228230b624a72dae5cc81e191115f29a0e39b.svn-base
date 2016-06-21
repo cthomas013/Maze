@@ -1,0 +1,71 @@
+package generation;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.StubOrder;
+import generation.Order.Builder;
+
+public class MazeFactoryTest {
+	
+	private boolean deterministic = true;
+	private Order ord;
+	private MazeFactory mf1;
+	private MazeFactory mf2;
+	private Order stub1;
+	private Order stub2;
+	
+	
+
+	@Before
+	public void setUp() {
+		mf1 = new MazeFactory();
+		mf2 = new MazeFactory(deterministic);
+		stub1 = new StubOrder();
+		stub2 = new StubOrder(3, Order.Builder.Prim);
+	}
+
+	@Test
+	public void testMazeFactory() {
+		assertNotNull(mf1);
+	}
+
+	@Test
+	public void testMazeFactoryBoolean() {
+		assertNotNull(mf2);
+	}
+
+	@Test
+	public void testOrder() {
+		// make sure the order is not null
+		assertNotNull(mf1.order(stub1));
+		assertNotNull(mf2.order(stub1));
+	}
+		
+	@Test
+	public void testStubOrder() {
+		// test the StubOrder constructor when no arguments are given
+		assertEquals(0, stub1.getSkillLevel());
+		assertEquals(Builder.DFS, stub1.getBuilder());
+		assertEquals(true, stub1.isPerfect());
+		
+		// test the StubOrder constructor when arguments are given
+		assertEquals(3, stub2.getSkillLevel());
+		assertEquals(Builder.Prim, stub2.getBuilder());
+		assertEquals(true, stub2.isPerfect());
+		
+	}
+
+	@Test
+	public void testCancel() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testWaitTillDelivered() {
+		fail("Not yet implemented");
+	}
+
+}

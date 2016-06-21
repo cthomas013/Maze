@@ -1,0 +1,271 @@
+package falstad;
+
+import generation.CardinalDirection;
+import generation.Cells;
+
+public class BasicRobot implements Robot {
+	
+	protected int[] currentPosition;
+	protected CardinalDirection direction;
+	protected MazeController maze;
+	protected Cells cells;
+	protected float batteryLevel;
+	protected boolean hasStopped;
+	
+	public BasicRobot() {
+		this.currentPosition = new int[2];
+		this.currentPosition[0] = 0;
+		this.currentPosition[1] = 0;
+		this.maze = null;
+		this.batteryLevel = 2500;
+		this.hasStopped = false;
+		direction = CardinalDirection.East;
+	}
+
+	@Override
+	public void rotate(Turn turn) {
+		switch(turn) {
+		case LEFT:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 3) {
+				this.direction = this.direction.rotateCounterClockwise();
+				this.batteryLevel -= 3;
+			}
+			else {
+				this.hasStopped = true;
+			}
+		case RIGHT:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 3) {
+				this.direction = this.direction.rotateClockwise();
+				this.batteryLevel -= 3;
+			}
+			else {
+				this.hasStopped = true;
+			}
+		case AROUND:
+			// check to make sure there is enough battery to make the turn
+			if (this.batteryLevel >= 6) {
+				this.direction = this.direction.oppositeDirection();
+				this.batteryLevel -= 6;
+			}
+			else {
+				this.hasStopped = true;
+			}
+		}
+	}
+
+	@Override
+	public void move(int distance, boolean manual) {
+		// check to make sure you have enough battery to move 
+//		if (this.batteryLevel >= 5) {
+//			if (manual == true) {
+//				distance = 1;
+//			}
+//			else {
+//				int count = 0;
+//				while ((count < distance) && (this.cells.hasNoWall
+//						(this.currentPosition[0], this.currentPosition[1], this.direction) == true)) {
+//					switch(this.direction) {
+//					case North:
+//					case 
+//					}
+//				}
+//			}
+//		}
+		while (distance > 0) {
+			if (this.batteryLevel >= 5) {
+				if (manual == true) {
+					distance = 1;
+				}
+				if (this.distanceToObstacle(Direction.FORWARD) > 0) {
+					
+					// create a switch to see which direction you are facing so you can change
+					// your current position
+					switch(this.direction) {
+					case North:
+						this.currentPosition[0]--;
+					case East:
+						this.currentPosition[1]++;
+					case West:
+						this.currentPosition[1]--;
+					case South:
+						this.currentPosition[0]++;
+					}
+					// call the key down method to simulate a step forward buy the robot
+					this.maze.keyDown(8);
+					this.batteryLevel -= 5;
+					distance--;
+				}
+				else {
+					this.hasStopped = true;
+				}
+			}
+			else {
+				this.hasStopped = true;
+			}
+		}
+	}
+
+	@Override
+	public int[] getCurrentPosition() {
+		return this.currentPosition;
+	}
+
+	@Override
+	public void setMaze(MazeController maze) {
+		this.maze = maze;
+		this.cells = new Cells(this.maze.mazeConfig.getWidth(), this.maze.mazeConfig.getHeight());
+		this.cells = this.maze.mazeConfig.getMazecells();
+		this.currentPosition = this.maze.getCurrentPosition();
+//		this.direction = this.maze.getCurrentDirection();
+		int[] cd = new int[2];
+		cd = this.direction.getDirection();
+		if (cd[0] == 0 && cd[1] == -1) {
+			this.direction = CardinalDirection.North;
+		}
+		else if (cd[0] == 1 && cd[1] == 0) {
+			this.direction = CardinalDirection.East;
+		}
+		else if (cd[0] == 0 && cd[1] == 1) {
+			this.direction = CardinalDirection.South;
+		}
+		else {
+			this.direction = CardinalDirection.West;
+		}
+	}
+
+	@Override
+	public boolean isAtGoal() {
+		return cells.isExitPosition(this.currentPosition[0], this.currentPosition[1]);
+	}
+
+	@Override
+	public boolean canSeeGoal(Direction direction) throws UnsupportedOperationException {
+		// get the cardinal direction for the purpose of finding if a cell has a wall
+		CardinalDirection cd;
+		if (direction == Direction.LEFT) {
+			cd = this.direction.rotateCounterClockwise();
+		}
+		else if (direction == Direction.RIGHT) {
+			cd = this.direction.rotateClockwise();
+		}
+		else if (direction == Direction.BACKWARD) {
+			cd = this.direction.oppositeDirection();
+		}
+		else {
+			cd = this.direction;
+		}
+		
+		int currX = this.currentPosition[0];
+		int currY = this.currentPosition[1];
+		while ((cells.hasWall(currX, currY, cd) != true) && (cells.isExitPosition(currX, currY) != true)) {
+			switch(cd) {
+			case North:
+				currX++;
+			case South:
+				currX--;
+			case East:
+				currY++;
+			case West:
+				currY--;
+			}
+		}
+		if (cells.isExitPosition(currX, currY) == true) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		return cells.isInRoom(this.currentPosition[0], this.currentPosition[1]);
+	}
+
+	@Override
+	public boolean hasRoomSensor() {
+		return true;
+	}
+
+	@Override
+	public CardinalDirection getCurrentDirection() {
+		return this.maze.getCurrentDirection();
+	}
+
+	@Override
+	public float getBatteryLevel() {
+		return this.batteryLevel;
+	}
+
+	@Override
+	public void setBatteryLevel(float level) {
+		this.batteryLevel = level;
+	}
+
+	@Override
+	public float getEnergyForFullRotation() {
+		return 12;
+	}
+
+	@Override
+	public float getEnergyForStepForward() {
+		return  5;
+	}
+
+	@Override
+	public boolean hasStopped() {
+		return this.hasStopped;
+	}
+
+	@Override
+	public int distanceToObstacle(Direction direction) throws UnsupportedOperationException {
+		// get the cardinal direction for the purpose of finding if a cell has a wall
+		CardinalDirection cd;
+		if (direction == Direction.LEFT) {
+			cd = this.direction.rotateCounterClockwise();
+		}
+		else if (direction == Direction.RIGHT) {
+			cd = this.direction.rotateClockwise();
+		}
+		else if (direction == Direction.BACKWARD) {
+			cd = this.direction.oppositeDirection();
+		}
+		else {
+			cd = this.direction;
+		}
+		// set a counter to see how many steps you can go before running into an obstacle
+		int count = 0;
+		int maxValue = cells.height + 1;
+		int currX = this.currentPosition[0];
+		int currY = this.currentPosition[1];
+		// use a while loop to keep the count until you hut a wall
+		while (cells.hasWall(currX, currY, cd) != true) {
+			if (this.canSeeGoal(direction) == true) {
+				return maxValue;
+			}
+			else {
+				switch(cd) {
+				case North:
+					currX++;
+				case South:
+					currX--;
+				case East:
+					currY++;
+				case West:
+					currY--;
+				
+				count++;
+				}
+			}
+		}
+		return count;
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		return true;
+	}
+
+}
